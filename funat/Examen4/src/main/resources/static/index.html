@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reportes de Productos</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        input, button {
+            padding: 6px;
+            margin: 5px;
+        }
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+        .success {
+            color: green;
+            margin-top: 5px;
+        }
+        .user-card {
+            border: 1px solid #aaa;
+            padding: 10px;
+            margin-top: 10px;
+            width: 260px;
+        }
+    </style>
+
+</head>
+<body>
+
+<h1>Registrar Reporte</h1>
+
+<input id="productName" type="text" placeholder="Nombre del producto"><br>
+<input id="problemDescription" type="text" placeholder="Descripción del problema"><br>
+<input id="reportDate" type="text" placeholder="YYYY-MM-DD"><br>
+
+<button onclick="sendReport()">Enviar</button>
+
+<p id="msg"></p>
+
+<script>
+
+    function sendReport() {
+        const productName = document.getElementById("productName").value.trim();
+        const problemDescription = document.getElementById("problemDescription").value.trim();
+        const reportDate = document.getElementById("reportDate").value.trim();
+        const msg = document.getElementById("msg");
+
+        msg.innerHTML = "";
+
+        if (!productName || !problemDescription || !reportDate) {
+            msg.innerHTML = "<span class='error'>Todos los campos son obligatorios</span>";
+            return;
+        }
+
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(reportDate)) {
+            msg.innerHTML = "<span class='error'>Fecha inválida, use YYYY-MM-DD</span>";
+            return;
+        }
+
+        fetch("/reports", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ productName, problemDescription, reportDate })
+        })
+            .then(async res => {
+                const data = await res.json();
+
+                if (!res.ok) {
+                    msg.innerHTML = "<span class='error'>Error: " + JSON.stringify(data) + "</span>";
+                } else {
+                    msg.innerHTML = "<span class='success'>Reporte creado con ID " + data.id + "</span>";
+                }
+            });
+    }
+
+</script>
+
+</body>
+</html>
